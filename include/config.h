@@ -36,8 +36,6 @@ extern config_t config;
 */
 #ifndef NDEBUG
     #define plog(...) printf(__VA_ARGS__); fflush(stdout)
-#else
-    #define plog(...)
 #endif
 
 /**
