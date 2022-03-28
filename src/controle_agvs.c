@@ -6,10 +6,7 @@
 #include "process_sync.h"
 #include "agv_data.h"
 
-void controle_inicializa_agvs(controle_agvs_t * controle, unsigned int quantidade_agvs)
-{
-    /* TODO: Adicionar código nesta função se necessário! */
-    
+void controle_inicializa_agvs(controle_agvs_t * controle, unsigned int quantidade_agvs){
     // Inicializa o semáforo posiciona para a quantidade máxima de carrinhos posicionados
     sem_init(&semaphores.agv_posiciona, 0, 2);
     pthread_mutex_init(&mutexes.agv_reciclar_prox, NULL); // Inicializa mutex de controle para reciclagem do proximo agv
@@ -32,27 +29,20 @@ void controle_inicializa_agvs(controle_agvs_t * controle, unsigned int quantidad
     plog("[controle AGVs] Inicializado\n");
 }
 
-agv_t * controle_retorna_agv(controle_agvs_t * self, bool reciclagem)
-{
-    /* TODO: retornar o AGV posicionado para receber lâmpadas aprovadas no teste (se reciclar==false) 
-       ou rejeitadas (se reciclar==true); aguarda o posicionamento de AGVs se necessário */
-
+agv_t * controle_retorna_agv(controle_agvs_t * self, bool reciclagem){
     // Espera até que ambos os AGVs estejam posicionados
     sem_wait(&semaphores.agvs_ambos_disponiveis);
     sem_post(&semaphores.agvs_ambos_disponiveis);
     for (int i = 0; i < config.quantidade_agvs; i++) {
-        if (self->agvs[i].posicionado && self->agvs[i].reciclar == reciclagem) {
+        if (self->agvs[i].posicionado && self->agvs[i].reciclar == reciclagem) 
             return &self->agvs[i];
-        }
     }
 
     plog("[controle AGVs] AGV Posicionado não encontrado\n");
     return NULL;
 }
 
-void controle_finaliza_agvs(controle_agvs_t * controle)
-{
-    /* TODO: Adicionar código nesta função se necessário! */
+void controle_finaliza_agvs(controle_agvs_t * controle){
     // Destroi os semáforos que regulam o transporte
     sem_destroy(&semaphores.finaliza_sistema);
     sem_destroy(&semaphores.agv_transporta_reprovadas);
