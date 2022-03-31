@@ -33,3 +33,4 @@ Para executar o programa de modo que 200 lâmpadas sejam testadas, com velocidad
 
     ./program -l 200 -v 5 -b 10 -t 4 -a 6 -c 12
 
+
