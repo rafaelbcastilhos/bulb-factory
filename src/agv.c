@@ -13,10 +13,9 @@ void agv_inicializa(agv_t *self, unsigned int id) {
     self->posicionado = false;
     self->reciclar = false;
 
-    if (pthread_create(&self->thread, NULL, agv_executa, (void *)self) == 0){
+    if (pthread_create(&self->thread, NULL, agv_executa, (void *)self) == 0) {
         plog("[AGV %u] Inicializado\n", self->id);
-    }
-    else{
+    } else {
         plog("[AGV %u] Erro ao inicializar AGV\n", self->id);
     }
 }
@@ -41,18 +40,19 @@ void *agv_executa(void *arg) {
         // Garante que não haverão 2 posts no semáforo de disponibilidade dos
         // AGVs, afinal este deve ser binário. Apenas o carrinho de reciclagem,
         // que é o segundo a chegar, faz o post
-        if (reciclar_prox) 
+        if (reciclar_prox) {
             sem_post(&semaphores.agvs_ambos_disponiveis);
+        }
 
-        if (self->reciclar) 
+        if (self->reciclar) {
             sem_wait(&semaphores.agv_transporta_reprovadas);
-        else 
+        } else {
             sem_wait(&semaphores.agv_transporta_aprovadas);
-
+        }
         agv_transporta(self);
-
-        if (agv_data.total_lampadas_entregues == config.quantidade_lampadas) 
+        if (agv_data.total_lampadas_entregues == config.quantidade_lampadas) {
             sem_post(&semaphores.finaliza_sistema);
+        }
     }
 
     while (true) {
@@ -61,14 +61,16 @@ void *agv_executa(void *arg) {
         agv_posiciona(self, agv_data.reciclar_prox);
         sem_post(&semaphores.agvs_ambos_disponiveis);
 
-        if (self->reciclar)
+        if (self->reciclar) {
             sem_wait(&semaphores.agv_transporta_reprovadas);
-        else
+        } else {
             sem_wait(&semaphores.agv_transporta_aprovadas);
+        }
         agv_transporta(self);
         // Finalize o sistema se todas as lâmpadas já tiverem sido entregues
-        if (agv_data.total_lampadas_entregues == config.quantidade_lampadas)
+        if (agv_data.total_lampadas_entregues == config.quantidade_lampadas) {
             sem_post(&semaphores.finaliza_sistema);
+        }
     }
 
     pthread_exit(NULL);
@@ -86,14 +88,13 @@ void agv_posiciona(agv_t *self, bool reciclar) {
                 "[AGV %u] Posicionado para carregamento com lâmpadas para "
                 "reciclagem\n",
                 self->id);
-        } 
-        else {
+        } else {
             plog(
                 "[AGV %u] Posicionado para carregamento com lâmpadas aprovadas "
                 "no teste\n",
                 self->id);
         }
-    } else{
+    } else {
         plog("[AGV %u] Erro ao tentar posicionar AVG em uso\n", self->id);
     }
 }
@@ -110,10 +111,11 @@ void agv_insere(agv_t *self, lampada_t *lampada) {
 
     if (self->cont_lampadas == config.capacidade_agv) {
         sem_wait(&semaphores.agvs_ambos_disponiveis);
-        if (self->reciclar)
+        if (self->reciclar) {
             sem_post(&semaphores.agv_transporta_reprovadas);
-        else
+        } else {
             sem_post(&semaphores.agv_transporta_aprovadas);
+        }
     }
     plog("[AGV %u] Lâmpada inserida no compartimento de carga.\n", self->id);
 }
